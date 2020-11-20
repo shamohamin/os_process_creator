@@ -1,0 +1,7 @@
+3 2
+/bin/ls -ltrh . 2
+/bin/ls -a /tmp 10
+/bin/ls -a /bin 4
+command arg1 arg2 10
+command 6
+/bin/ps aux 7
