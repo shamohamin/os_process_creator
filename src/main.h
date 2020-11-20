@@ -2,6 +2,14 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
+#if defined(__linux__)
+#define PLATFORM 0
+#elif defined(__APPLE__)
+#define PLATFORM 1
+#else
+#define PLATFORM -1
+#endif
+
 #ifndef _MAIN_H
 #define _MAIN_H
 
@@ -15,19 +23,23 @@
 #define READ_END 0
 #define WRITE_END 1
 
-#define ERROR_HANDLER_AND_DIE(err) \
-    {                              \
-        fprintf(stderr, err);      \
-        exit(1);                   \
+#define ERROR_HANDLER_AND_DIE(err)    \
+    {                                 \
+        red();                        \
+        printf("error: %s\n", err); \
+        reset();                      \
+        exit(1);                      \
     }
 
 #define SHOWING_CONSUMING_TIME(elapsed_time)                                           \
     {                                                                                  \
         printf("***********************\n");                                           \
+        green();                                                                       \
         printf("TIMING OF PROGRAM \n");                                                \
         printf("time in seconds: %lf\n", ((double)elapsed_time));                      \
         printf("time in milli seconds: %lf ms\n", ((double)elapsed_time) * 1000.0);    \
         printf("time in micro seconds: %lf us\n", ((double)elapsed_time) * 1000000.0); \
+        reset();                                                                       \
         printf("***********************\n");                                           \
     }
 
@@ -67,5 +79,8 @@ ChildInfo *create_new_process_info(pid_t, pid_t, int, int, int, int);
 int enque(ChildInfo *, int);
 void set_end_time_and_status_for_terminated_process(pid_t, int, int);
 void printing_process_info(ChildInfo *c_process);
+void red();
+void green();
+void reset();
 
 #endif

@@ -108,6 +108,7 @@ void creating_process(Command *command_st)
     for (int i = 0; childs[i] != NULL; i++)
         printing_process_info(childs[i]);
 
+    
     SHOWING_CONSUMING_TIME((double)(clock() - start) / CLOCKS_PER_SEC);
 }
 

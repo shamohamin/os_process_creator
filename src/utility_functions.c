@@ -255,3 +255,28 @@ void printing_process_info(ChildInfo *c_process)
     printf("exit status: %d\n", c_process->exit_status);
     printf("***********************\n");
 }
+
+// colors for console
+void red()
+{
+    if (PLATFORM == 1)
+        printf("\x1b[1;31m");
+    else if (PLATFORM == 0)
+        printf("\033[1;31m");
+}
+
+void green()
+{
+    if (PLATFORM == 1)
+        printf("\x1b[0;32m");
+    else if (PLATFORM == 0)
+        printf("\033[0;32m");
+}
+
+void reset()
+{
+    if (PLATFORM == 1)
+        printf("\x1b[0m");
+    else if (PLATFORM == 0)
+        printf("\033[0m");
+}
