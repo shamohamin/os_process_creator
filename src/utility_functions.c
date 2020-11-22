@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "main.h"
+#include "headers.h"
 
 int parse_command_to_be_executed(char *line, char **args)
 {
@@ -242,17 +242,28 @@ void reading_file(char *filepath, Command *command_st)
     fclose(f);
 }
 
+// showing the process INFO
 void printing_process_info(ChildInfo *c_process)
 {
+
     printf("***********************\n");
+
+    if (c_process->exit_status == OK_EXIT_STATUS)
+        green();
+    else
+        red();
+
     printf("id: %d\n", c_process->id);
     printf("number of process: %d\n", c_process->process_number);
+    printf("number of parrent: %d\n", c_process->parrent_number);
     printf("is_parrent: %d\n", c_process->is_parrent);
-    printf("start_time: %lu\n", c_process->start_time);
-    printf("end time: %lu\n", c_process->end_time);
-    printf("elapsed time: %f\n", c_process->execution_time);
+    printf("is_child: %d\n", c_process->is_child);
+    printf("start_time: %.10lu\n", c_process->start_time);
+    printf("end time: %.10lu\n", c_process->end_time);
+    printf("elapsed time: %.10f\n", c_process->execution_time);
     printf("parrent process id: %d\n", c_process->parrent_id);
     printf("exit status: %d\n", c_process->exit_status);
+    reset();
     printf("***********************\n");
 }
 
