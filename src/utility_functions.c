@@ -4,6 +4,28 @@
 #include <string.h>
 #include "headers.h"
 
+int generate_divisors_of_number(int commands_count, int configuration[])
+{
+
+    int counter = 0;
+    for (int i = 1; i <= commands_count; i++)
+        if (commands_count % i == 0)
+        {
+            if (counter > commands_count)
+            {
+                configuration = realloc(configuration, counter);
+                if (configuration == NULL)
+                {
+                    ERROR_HANDLER_AND_DIE("reallocation was not successfull");
+                }
+            }
+            configuration[counter] = i;
+            counter++;
+        }
+
+    return counter;
+}
+
 int parse_command_to_be_executed(char *line, char **args)
 {
     int args_counting = 0;
@@ -234,7 +256,7 @@ void reading_file(char *filepath, Command *command_st)
         i++;
     }
 
-    command_st->commands_count = i;
+    command_st->commands_count = i - 1;
 
     // freeing the pointers
     free(buffer);
@@ -243,7 +265,7 @@ void reading_file(char *filepath, Command *command_st)
 }
 
 // showing the process INFO
-void printing_process_info(ChildInfo *c_process)
+void printing_process_info(ChildInfo *c_process, Command *com)
 {
 
     printf("***********************\n");
@@ -256,13 +278,13 @@ void printing_process_info(ChildInfo *c_process)
     printf("id: %d\n", c_process->id);
     printf("number of process: %d\n", c_process->process_number);
     printf("number of parrent: %d\n", c_process->parrent_number);
+    printf("commnad of this process: %s", c_process->command);
     printf("is_parrent: %d\n", c_process->is_parrent);
     printf("is_child: %d\n", c_process->is_child);
-    printf("start_time: %.10lu\n", c_process->start_time);
-    printf("end time: %.10lu\n", c_process->end_time);
-    printf("elapsed time: %.10f\n", c_process->execution_time);
+    printf("elapsed time: %f sec\n", c_process->execution_time);
     printf("parrent process id: %d\n", c_process->parrent_id);
     printf("exit status: %d\n", c_process->exit_status);
+    printf("number_of_try: %d\n", c_process->number_of_trys);
     reset();
     printf("***********************\n");
 }
