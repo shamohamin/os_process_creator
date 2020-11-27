@@ -30,9 +30,6 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
     pid_t children_id[command_st->proccess_count];
     pid_t main_routing_id = getpid();
 
-    if (pipe(fd) == -1)
-        ERROR_HANDLER_AND_DIE("couldn't make pipe;");
-
     for (int i = 0; i < command_st->proccess_count; i++)
     {
         memset(write_msg, 0, buff_size);

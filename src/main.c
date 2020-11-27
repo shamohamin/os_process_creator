@@ -26,7 +26,7 @@ void start_execution(char *file_path)
         ptr->number_of_divsor * sizeof(ProcessConfigurations *));
 
     for (int i = 0; i < ptr->number_of_divsor; i++)
-    { 
+    {
         holder[i] = (ProcessConfigurations *)malloc(sizeof(ProcessConfigurations));
         int temp = ptr->generated_configuration[i];
         ptr->child_proccess_count = temp;
@@ -79,6 +79,8 @@ void write_output_file(int size, ProcessConfigurations **holder)
                              &holder[i]->process_created_inconfiguration[j]->process_number, INT);
             put_line_in_file(out, "\t\t\t\"%s\":%d \n", "parrent process number",
                              &holder[i]->process_created_inconfiguration[j]->parrent_number, INT);
+            put_line_in_file(out, "\t\t\t\"%s\":%d \n", "number of trys",
+                             &holder[i]->process_created_inconfiguration[j]->number_of_trys, INT);
             if (j == holder[i]->childs_size - 1)
                 fputs("\t\t}\n", out);
             else
