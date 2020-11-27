@@ -25,13 +25,12 @@ void start_execution(char *file_path)
     ProcessConfigurations **holder = (ProcessConfigurations **)malloc(
         ptr->number_of_divsor * sizeof(ProcessConfigurations *));
 
-    for (int i = ptr->number_of_divsor - 1; i >= 0; i--)
-    {
+    for (int i = 0; i < ptr->number_of_divsor; i++)
+    { 
         holder[i] = (ProcessConfigurations *)malloc(sizeof(ProcessConfigurations));
         int temp = ptr->generated_configuration[i];
         ptr->child_proccess_count = temp;
         ptr->proccess_count = ptr->commands_count / temp;
-        printf("ptr : %d\n", ptr->proccess_count);
         holder[i]->configuration[0] = temp;
         holder[i]->configuration[1] = ptr->commands_count / temp;
         struct timeval start, end;
@@ -66,8 +65,6 @@ void write_output_file(int size, ProcessConfigurations **holder)
         for (int j = 0; j < (holder[i]->childs_size); j++)
         {
             fputs("\t\t{\n", out);
-            holder[i]->process_created_inconfiguration[j]->execution_time =
-                (holder[i]->process_created_inconfiguration[j]->execution_time * 1000.0);
             put_line_in_file(out, "\t\t\t\"%s\":%lf, \n", "execution time",
                              &holder[i]->process_created_inconfiguration[j]->execution_time, DOUBLE);
             put_line_in_file(out, "\t\t\t\"%s\":\"%s\", \n", "Command",
@@ -80,10 +77,8 @@ void write_output_file(int size, ProcessConfigurations **holder)
                              &holder[i]->process_created_inconfiguration[j]->parrent_id, INT);
             put_line_in_file(out, "\t\t\t\"%s\":%d, \n", "child process number",
                              &holder[i]->process_created_inconfiguration[j]->process_number, INT);
-            put_line_in_file(out, "\t\t\t\"%s\":%d, \n", "parrent process number",
+            put_line_in_file(out, "\t\t\t\"%s\":%d \n", "parrent process number",
                              &holder[i]->process_created_inconfiguration[j]->parrent_number, INT);
-            put_line_in_file(out, "\t\t\t\"%s\":%d \n", "number of trys",
-                             &holder[i]->process_created_inconfiguration[j]->number_of_trys, INT);
             if (j == holder[i]->childs_size - 1)
                 fputs("\t\t}\n", out);
             else

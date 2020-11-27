@@ -12,6 +12,7 @@
 
 #ifndef _MAIN_H
 #define _MAIN_H
+
 #define ENQUEU_ID -1111
 #define OK_EXIT_STATUS 0
 #define IS_PARRENT 1
@@ -93,7 +94,7 @@ typedef struct
 
 // static ChildInfo **childs;
 
-void start_execution(char *);
+void start_execution(char *file_path);
 void pipe_creator(int[], int);
 void reading_file(char *, Command *);
 char *line_convertion(char *);
@@ -111,8 +112,8 @@ int enqueue(ChildInfo **, ChildInfo *, ChildInfo, int, int *);
 void set_end_time_and_status_for_terminated_process(ChildInfo **, ChildInfo[], pid_t, int, int, int);
 void printing_process_info(ChildInfo *, Command *);
 void handeling_wait_for_proccess(Command *, int, int, int[], ChildInfo[], ChildInfo **, int *, pid_t[], ChildInfo **, int *);
-void write_output_file(int, ProcessConfigurations **);
-void put_line_in_file(FILE *, char *, char *, void *, int);
+void write_output_file(int size, ProcessConfigurations **holder);
+void put_line_in_file(FILE *file, char *format, char *key, void *value, int op);
 void red();
 void green();
 void reset();

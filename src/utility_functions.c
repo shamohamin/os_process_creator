@@ -9,7 +9,6 @@
 
 int generate_divisors_of_number(int commands_count, int configuration[])
 {
-
     int counter = 0;
     for (int i = 1; i <= commands_count; i++)
         if (commands_count % i == 0)
@@ -27,6 +26,13 @@ int generate_divisors_of_number(int commands_count, int configuration[])
         }
 
     return counter;
+}
+
+void pipe_creator(int fd[], int size)
+{
+    for (int i = 0; i < size; i++)
+        if (pipe(&fd[2 * i]) < 0)
+            ERROR_HANDLER_AND_DIE("cant make pipes!");
 }
 
 int parse_command_to_be_executed(char *line, char **args)
@@ -146,11 +152,8 @@ char *split_the_generated_commnad(char src[], int pos, int count)
     return temp[pos];
 }
 
-void pipe_creator(int fd[], int size)
+void create_childs_process()
 {
-    for (int i = 0; i < size; i++)
-        if (pipe(&fd[2 * i]) < 0)
-            ERROR_HANDLER_AND_DIE("cant make pipes!");
 }
 
 /*

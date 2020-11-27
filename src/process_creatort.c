@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 #include "headers.h"
 
 void creating_process(Command *command_st, ProcessConfigurations *conf)
@@ -23,12 +23,16 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
         childs[i]->id = ENQUEU_ID;
     }
     int counter = 0;
-    pid_t main_routing_id = getpid();
+
     int fd[2 * command_st->proccess_count];
     printf("ptr : %d\n", command_st->proccess_count);
-    pipe_creator(fd, command_st->proccess_count);    
+    pipe_creator(fd, command_st->proccess_count);
     pid_t children_id[command_st->proccess_count];
-    
+    pid_t main_routing_id = getpid();
+
+    if (pipe(fd) == -1)
+        ERROR_HANDLER_AND_DIE("couldn't make pipe;");
+
     for (int i = 0; i < command_st->proccess_count; i++)
     {
         memset(write_msg, 0, buff_size);
@@ -43,16 +47,16 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
             int fd_child[2];
             pid_t process_childs[command_st->child_proccess_count];
             ChildInfo created_process_write[command_st->child_proccess_count];
-            
+
+            if (pipe(fd_child) == -1)
+                ERROR_HANDLER_AND_DIE("couldn't make pipe;");
+
             ssize_t sizzzz = read(fd[2 * i + READ_END], read_msg, buff_size);
 
-            if (pipe(fd_child) == -1){
-                ERROR_HANDLER_AND_DIE("couldn't make pipe;");
-            }
-            
             for (int j = 0; j < command_st->child_proccess_count; j++)
             {
                 memset(write_msg_child, 0, buff_size);
+
                 pid_t child_pid = fork();
 
                 if (child_pid < 0)
@@ -63,23 +67,22 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                 {
                     child_process(read_msg_child, fd_child, buff_size);
                 }
+
                 strcpy(
                     write_msg_child,
                     split_the_generated_commnad(read_msg, j, command_st->child_proccess_count));
-                process_childs[j] = child_pid;
 
                 created_process_write[j] = create_new_process_info(
                     child_pid, getpid(), IS_CHILD, IS_NOT_PARRENT, j + 1, i + 1);
+
                 write(fd_child[WRITE_END], write_msg_child, buff_size);
             }
 
             for (int j = 0; j < command_st->child_proccess_count; j++)
             {
-
                 int status;
-                int t;
-                t = 0;
-
+                int t = 0;
+                pid_t __child_id = wait(&status);
                 waitpid(process_childs[j], &status, 0);
                 // retry
                 if (status != 0)
@@ -87,7 +90,6 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                     pid_t ppid = fork();
                     if (ppid == 0)
                     {
-                        // exit(0);
                         child_process(read_msg_child, fd_child, buff_size);
                     }
                     strcpy(write_msg_child,
@@ -98,7 +100,7 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                 }
                 set_end_time_and_status_for_terminated_process(
                     NULL, created_process_write, process_childs[j],
-                    status, command_st->child_proccess_count, t);
+                    -status, command_st->child_proccess_count, t);
             }
 
             ssize_t byets_written = write(
@@ -106,7 +108,6 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                 sizeof(ChildInfo) * command_st->child_proccess_count);
             exit(0);
         }
-        // exit(1);
         children_id[i] = pid;
         ChildInfo dummy;
         all_childs_count = enqueue(
@@ -128,13 +129,10 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
         created_process_reader,
         childs, &all_childs_count,
         children_id, childs, &counter);
-    fflush(stdout);
-    
-    copy_process(counter, conf, childs, command_st);
-    // for (int i = 0; i < counter; i++)
-        // printing_process_info(conf->process_created_inconfiguration[i], command_st);
-    for(int i = 0; i < command_st->proccess_count; i++)
-        close(fd[2*i]);
+
+    copy_process(all_childs_count, conf, childs, command_st);
+    for (int i = 0; i < command_st->proccess_count; i++)
+        -close(fd[2 * i]);
 }
 
 void child_process(char read_msg_child[], int fd_child[], int buff_size)
@@ -204,10 +202,10 @@ ChildInfo create_new_process_info(
 void copy_process(int all_childs, ProcessConfigurations *conf, ChildInfo **childs, Command *com)
 {
     conf->process_created_inconfiguration = (ChildInfo **)malloc(all_childs * sizeof(ChildInfo *));
-    double exec_time = 0.0;
     if (conf->process_created_inconfiguration == NULL)
         ERROR_HANDLER_AND_DIE("cant allocate!");
     int i = 0;
+    double exec_time = 0.0;
     for (i = 0; i < all_childs && childs[i] != NULL; i++)
     {
         if (childs[i]->id == ENQUEU_ID || childs[i] == NULL)
@@ -223,15 +221,11 @@ void copy_process(int all_childs, ProcessConfigurations *conf, ChildInfo **child
                                                                                childs[i]->process_number,
                                                                                childs[i]->parrent_number);
         if (childs[i]->is_parrent == IS_PARRENT)
-        {
             strcpy(conf->process_created_inconfiguration[i]->command,
                    "Parrent Level 1 Doesn't Have Commnad. \0");
-        }
         else
-        {
             strcpy(conf->process_created_inconfiguration[i]->command,
                    com->commands[((childs[i]->parrent_number - 1) + (childs[i]->process_number - 1))]);
-        }
 
         conf->process_created_inconfiguration[i]->end_time = childs[i]->start_time;
         conf->process_created_inconfiguration[i]->end_time = childs[i]->end_time;
@@ -273,7 +267,6 @@ int enqueue(ChildInfo **holder, ChildInfo *c_process_ptr, ChildInfo c_process, i
 
     if (c_process_ptr == NULL)
     {
-
         holder[*counter]->id = c_process.id;
         holder[*counter]->parrent_id = c_process.parrent_id;
         holder[*counter]->is_child = c_process.is_child;
@@ -356,33 +349,22 @@ void handeling_wait_for_proccess(
     ChildInfo **childs,
     int *count)
 {
-
     for (int i = 0; i < counter; i++)
     {
         memset(childs_reader, 0, sizeof(ChildInfo) * command_st->child_proccess_count);
         int status;
         waitpid(children_id[i], &status, 0);
-        set_end_time_and_status_for_terminated_process(holder,
-                                                       NULL, children_id[i],
-                                                       status, command_st->commands_count, 0);
-        // ssize_t readed_bytes_size = read(
-        //     fd[READ_END],
-        //     childs_reader,
-        //     sizeof(ChildInfo) * command_st->child_proccess_count);
-        // if (readed_bytes_size > 0)
-        //     for (int j = 0; j < command_st->child_proccess_count; j++)
-        //         *all_childs_count = enqueue(childs, NULL, childs_reader[j], *all_childs_count);
+        set_end_time_and_status_for_terminated_process(
+            holder, NULL, children_id[i], status, command_st->commands_count, 0);
     }
+
     for (int i = 0; i < command_st->proccess_count; i++)
     {
         ssize_t readed_bytes_size = read(fd[2 * i + READ_END],
                                          childs_reader,
                                          sizeof(ChildInfo) * command_st->child_proccess_count);
-
         if (readed_bytes_size > 0)
             for (int j = 0; j < command_st->child_proccess_count; j++)
-            {
                 *all_childs_count = enqueue(childs, NULL, childs_reader[j], *all_childs_count, count);
-            }
     }
 }
