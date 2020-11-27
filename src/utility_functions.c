@@ -5,7 +5,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 #include "headers.h"
+
+double calculate_time(struct timeval start, struct timeval end)
+{
+    double time_taken;
+    time_taken = (double)(end.tv_sec - start.tv_sec) * 1e6;
+    time_taken = (time_taken + (end.tv_usec - start.tv_usec)) * 1e-6;
+    return time_taken;
+}
 
 int generate_divisors_of_number(int commands_count, int configuration[])
 {

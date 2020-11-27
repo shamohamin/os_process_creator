@@ -96,7 +96,7 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                 }
                 set_end_time_and_status_for_terminated_process(
                     NULL, created_process_write, process_childs[j],
-                    -status, command_st->child_proccess_count, t);
+                        status, command_st->child_proccess_count, t);
             }
 
             ssize_t byets_written = write(
@@ -128,7 +128,7 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
 
     copy_process(all_childs_count, conf, childs, command_st);
     for (int i = 0; i < command_st->proccess_count; i++)
-        -close(fd[2 * i]);
+        close(fd[2 * i]);
 }
 
 void child_process(char read_msg_child[], int fd_child[], int buff_size)
@@ -165,7 +165,7 @@ ChildInfo *create_new_process_ptr_info(
     c_process->id = process_id;
     c_process->parrent_id = parrent_id;
     c_process->is_parrent = is_parrent;
-    gettimeofday(&c_process->start_time, NULL);
+    gettimeofday(&c_process->start_time, 0);
     c_process->is_child = is_child;
     c_process->process_number = process_number;
     c_process->parrent_number = parrent_number;
@@ -186,7 +186,7 @@ ChildInfo create_new_process_info(
     c_process.id = process_id;
     c_process.parrent_id = parrent_id;
     c_process.is_parrent = is_parrent;
-    gettimeofday(&c_process.start_time, NULL);
+    gettimeofday(&c_process.start_time, 0);
     c_process.is_child = is_child;
     c_process.process_number = process_number;
     c_process.parrent_number = parrent_number;
@@ -307,8 +307,8 @@ void set_end_time_and_status_for_terminated_process(
         {
             if (holder[i]->id == pid)
             {
-                gettimeofday(&holder[i]->end_time, NULL);
-                holder[i]->execution_time = COMPUTE_EXECUTION_TIME(holder[i]->start_time, holder[i]->end_time);
+                gettimeofday(&holder[i]->end_time, 0);
+                holder[i]->execution_time = calculate_time(holder[i]->start_time, holder[i]->end_time);
                 holder[i]->exit_status = exit_status;
                 if (number_of_try == 1)
                     holder[i]->number_of_trys++;
@@ -322,8 +322,8 @@ void set_end_time_and_status_for_terminated_process(
         {
             if (holder_1[i].id == pid)
             {
-                gettimeofday(&holder_1[i].end_time, NULL);
-                holder_1[i].execution_time = COMPUTE_EXECUTION_TIME(holder_1[i].start_time, holder_1[i].end_time);
+                gettimeofday(&holder_1[i].end_time, 0);
+                holder_1[i].execution_time = calculate_time(holder_1[i].start_time, holder_1[i].end_time);
                 holder_1[i].exit_status = exit_status;
                 if (number_of_try == 1)
                     holder_1[i].number_of_trys++;
@@ -347,7 +347,7 @@ void handeling_wait_for_proccess(
 {
     for (int i = 0; i < counter; i++)
     {
-        memset(childs_reader, 0, sizeof(ChildInfo) * command_st->child_proccess_count);
+        // memset(childs_reader, 0, sizeof(ChildInfo) * command_st->child_proccess_count);
         int status;
         waitpid(children_id[i], &status, 0);
         set_end_time_and_status_for_terminated_process(

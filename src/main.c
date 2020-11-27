@@ -56,7 +56,9 @@ void write_output_file(int size, ProcessConfigurations **holder)
     {
         fputs("\t{\n", out);
         holder[i]->execution_time = 1000.0 * holder[i]->execution_time;
+        holder[i]->actual_time = holder[i]->actual_time / 1e8;
         put_line_in_file(out, "\t\t\"%s\":%lf,\n", "execution time", &holder[i]->execution_time, DOUBLE);
+        put_line_in_file(out, "\t\t\"%s\":%lf,\n", "waiting of childs", &holder[i]->actual_time, DOUBLE);
         fputs("\t\t\"configuration\":[\n \t\t\t{\n", out);
         put_line_in_file(out, "\t\t\t\t\"%s\":%d, \n", "number of process level 1", &holder[i]->configuration[1], INT);
         put_line_in_file(out, "\t\t\t\t\"%s\":%d \n", "number of process level 2", &holder[i]->configuration[0], INT);

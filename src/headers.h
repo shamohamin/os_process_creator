@@ -114,6 +114,7 @@ void printing_process_info(ChildInfo *, Command *);
 void handeling_wait_for_proccess(Command *, int, int, int[], ChildInfo[], ChildInfo **, int *, pid_t[], ChildInfo **, int *);
 void write_output_file(int size, ProcessConfigurations **holder);
 void put_line_in_file(FILE *file, char *format, char *key, void *value, int op);
+double calculate_time(struct timeval start, struct timeval end);
 void red();
 void green();
 void reset();
