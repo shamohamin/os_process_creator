@@ -68,7 +68,7 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                 strcpy(
                     write_msg_child,
                     split_the_generated_commnad(read_msg, j, command_st->child_proccess_count));
-
+                process_childs[j] = child_pid;
                 created_process_write[j] = create_new_process_info(
                     child_pid, getpid(), IS_CHILD, IS_NOT_PARRENT, j + 1, i + 1);
 
