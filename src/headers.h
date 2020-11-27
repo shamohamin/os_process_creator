@@ -12,7 +12,7 @@
 
 #ifndef _MAIN_H
 #define _MAIN_H
-
+#define ENQUEU_ID -1111
 #define OK_EXIT_STATUS 0
 #define IS_PARRENT 1
 #define IS_CHILD 1
@@ -88,11 +88,13 @@ typedef struct
     int childs_size;
     struct timeval start, end;
     double execution_time;
+    double actual_time;
 } ProcessConfigurations;
 
-static ChildInfo **childs;
+// static ChildInfo **childs;
 
-void start_execution(char *file_path);
+void start_execution(char *);
+void pipe_creator(int[], int);
 void reading_file(char *, Command *);
 char *line_convertion(char *);
 char *seperating_values(char *, int);
@@ -105,12 +107,12 @@ void copy_process(int, ProcessConfigurations *, ChildInfo **, Command *);
 int generate_divisors_of_number(int, int[]);
 ChildInfo *create_new_process_ptr_info(pid_t, pid_t, int, int, int, int);
 ChildInfo create_new_process_info(pid_t, pid_t, int, int, int, int);
-int enqueue(ChildInfo **, ChildInfo *, ChildInfo, int);
+int enqueue(ChildInfo **, ChildInfo *, ChildInfo, int, int *);
 void set_end_time_and_status_for_terminated_process(ChildInfo **, ChildInfo[], pid_t, int, int, int);
 void printing_process_info(ChildInfo *, Command *);
-void handeling_wait_for_proccess(Command *, int, int, int[], ChildInfo[], ChildInfo **, int *);
-void write_output_file(int size, ProcessConfigurations **holder);
-void put_line_in_file(FILE *file, char *format, char *key, void *value, int op);
+void handeling_wait_for_proccess(Command *, int, int, int[], ChildInfo[], ChildInfo **, int *, pid_t[], ChildInfo **, int *);
+void write_output_file(int, ProcessConfigurations **);
+void put_line_in_file(FILE *, char *, char *, void *, int);
 void red();
 void green();
 void reset();

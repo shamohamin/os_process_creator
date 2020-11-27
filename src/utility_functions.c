@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <time.h>
 #include "headers.h"
 
 int generate_divisors_of_number(int commands_count, int configuration[])
@@ -143,8 +146,11 @@ char *split_the_generated_commnad(char src[], int pos, int count)
     return temp[pos];
 }
 
-void create_childs_process()
+void pipe_creator(int fd[], int size)
 {
+    for (int i = 0; i < size; i++)
+        if (pipe(&fd[2 * i]) < 0)
+            ERROR_HANDLER_AND_DIE("cant make pipes!");
 }
 
 /*
