@@ -79,7 +79,6 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
             {
                 int status;
                 int t = 0;
-                pid_t __child_id = wait(&status);
                 waitpid(process_childs[j], &status, 0);
                 // retry
                 if (status != 0)

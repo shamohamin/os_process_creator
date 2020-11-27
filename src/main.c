@@ -77,7 +77,7 @@ void write_output_file(int size, ProcessConfigurations **holder)
                              &holder[i]->process_created_inconfiguration[j]->parrent_id, INT);
             put_line_in_file(out, "\t\t\t\"%s\":%d, \n", "child process number",
                              &holder[i]->process_created_inconfiguration[j]->process_number, INT);
-            put_line_in_file(out, "\t\t\t\"%s\":%d \n", "parrent process number",
+            put_line_in_file(out, "\t\t\t\"%s\":%d, \n", "parrent process number",
                              &holder[i]->process_created_inconfiguration[j]->parrent_number, INT);
             put_line_in_file(out, "\t\t\t\"%s\":%d \n", "number of trys",
                              &holder[i]->process_created_inconfiguration[j]->number_of_trys, INT);
