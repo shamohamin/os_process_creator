@@ -94,7 +94,7 @@ typedef struct
 
 // static ChildInfo **childs;
 
-void start_execution(char *file_path);
+void start_execution(char *);
 void pipe_creator(int[], int);
 void reading_file(char *, Command *);
 char *line_convertion(char *);
@@ -112,9 +112,9 @@ int enqueue(ChildInfo **, ChildInfo *, ChildInfo, int, int *);
 void set_end_time_and_status_for_terminated_process(ChildInfo **, ChildInfo[], pid_t, int, int, int);
 void printing_process_info(ChildInfo *, Command *);
 void handeling_wait_for_proccess(Command *, int, int, int[], ChildInfo[], ChildInfo **, int *, pid_t[], ChildInfo **, int *);
-void write_output_file(int size, ProcessConfigurations **holder);
-void put_line_in_file(FILE *file, char *format, char *key, void *value, int op);
-double calculate_time(struct timeval start, struct timeval end);
+void write_output_file(int, ProcessConfigurations **);
+void put_line_in_file(FILE *, char *, char *, void *, int);
+double calculate_time(struct timeval, struct timeval);
 void red();
 void green();
 void reset();
