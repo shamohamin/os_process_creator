@@ -25,7 +25,7 @@ void start_execution(char *file_path)
     ProcessConfigurations **holder = (ProcessConfigurations **)malloc(
         ptr->number_of_divsor * sizeof(ProcessConfigurations *));
 
-    for (int i = 0; i < ptr->number_of_divsor; i++)
+    for (int i = ptr->number_of_divsor - 1; i >= 0; i--)
     {
         holder[i] = (ProcessConfigurations *)malloc(sizeof(ProcessConfigurations));
         int temp = ptr->generated_configuration[i];
