@@ -80,6 +80,7 @@ typedef struct
     int exit_status;
     char *command;
     int number_of_trys;
+    char output[LINE_SIZE * 10];
 } ChildInfo;
 
 typedef struct
@@ -103,7 +104,7 @@ void creating_process(Command *, ProcessConfigurations *);
 char *generating_commands(int, int, Command *);
 char *split_the_generated_commnad(char[], int, int);
 int parse_command_to_be_executed(char *, char **);
-void child_process(char[], int[], int);
+void child_process(char[], int[], int, int, int);
 void copy_process(int, ProcessConfigurations *, ChildInfo **, Command *);
 int generate_divisors_of_number(int, int[]);
 ChildInfo *create_new_process_ptr_info(pid_t, pid_t, int, int, int, int);
@@ -115,6 +116,7 @@ void handeling_wait_for_proccess(Command *, int, int, int[], ChildInfo[], ChildI
 void write_output_file(int, ProcessConfigurations **);
 void put_line_in_file(FILE *, char *, char *, void *, int);
 double calculate_time(struct timeval, struct timeval);
+void clean_output_string(char[]);
 void red();
 void green();
 void reset();

@@ -25,7 +25,6 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
     int counter = 0;
 
     int fd[2 * command_st->proccess_count];
-    printf("ptr : %d\n", command_st->proccess_count);
     pipe_creator(fd, command_st->proccess_count);
     pid_t children_id[command_st->proccess_count];
     pid_t main_routing_id = getpid();
@@ -41,14 +40,11 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
         }
         else if (pid == 0) // child
         {
-            int fd_child[2];
+            int fd_child[2 * command_st->child_proccess_count];
+            pipe_creator(fd_child, command_st->child_proccess_count);
             pid_t process_childs[command_st->child_proccess_count];
             ChildInfo created_process_write[command_st->child_proccess_count];
-
-            if (pipe(fd_child) == -1)
-                ERROR_HANDLER_AND_DIE("couldn't make pipe;");
-
-            ssize_t sizzzz = read(fd[2 * i + READ_END], read_msg, buff_size);
+            read(fd[2 * i + READ_END], read_msg, buff_size);
 
             for (int j = 0; j < command_st->child_proccess_count; j++)
             {
@@ -62,7 +58,7 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                 }
                 else if (child_pid == 0) // child of child
                 {
-                    child_process(read_msg_child, fd_child, buff_size);
+                    child_process(read_msg_child, fd_child, buff_size, j, 0);
                 }
 
                 strcpy(
@@ -72,7 +68,7 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                 created_process_write[j] = create_new_process_info(
                     child_pid, getpid(), IS_CHILD, IS_NOT_PARRENT, j + 1, i + 1);
 
-                write(fd_child[WRITE_END], write_msg_child, buff_size);
+                write(fd_child[2 * j + WRITE_END], write_msg_child, buff_size);
             }
 
             for (int j = 0; j < command_st->child_proccess_count; j++)
@@ -86,19 +82,24 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
                     pid_t ppid = fork();
                     if (ppid == 0)
                     {
-                        child_process(read_msg_child, fd_child, buff_size);
+                        child_process(read_msg_child, fd_child, buff_size, j, 1);
                     }
                     strcpy(write_msg_child,
                            split_the_generated_commnad(read_msg, j, command_st->child_proccess_count));
-                    write(fd_child[WRITE_END], write_msg_child, buff_size);
+                    write(fd_child[2 * j + WRITE_END], write_msg_child, buff_size);
                     wait(NULL);
                     t = 1;
                 }
                 set_end_time_and_status_for_terminated_process(
                     NULL, created_process_write, process_childs[j],
-                        status, command_st->child_proccess_count, t);
+                    status, command_st->child_proccess_count, t);
             }
-
+            for (int j = 0; j < command_st->child_proccess_count; j++)
+            {
+                char reader[buff_size * 2];
+                read(fd_child[2 * j + READ_END], reader, sizeof(reader));
+                strcpy(created_process_write[j].output, reader);
+            }
             ssize_t byets_written = write(
                 fd[2 * i + WRITE_END], created_process_write,
                 sizeof(ChildInfo) * command_st->child_proccess_count);
@@ -127,27 +128,31 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
         children_id, childs, &counter);
 
     copy_process(all_childs_count, conf, childs, command_st);
+    for (int i = 0; i < conf->childs_size; i++)
+        printing_process_info(conf->process_created_inconfiguration[i], NULL);
     for (int i = 0; i < command_st->proccess_count; i++)
         close(fd[2 * i]);
 }
 
-void child_process(char read_msg_child[], int fd_child[], int buff_size)
+void child_process(char read_msg_child[], int fd_child[], int buff_size, int pipe_number, int retry)
 {
     memset(read_msg_child, 0, buff_size);
-    read(fd_child[READ_END], read_msg_child, buff_size);
+    read(fd_child[pipe_number * 2 + READ_END], read_msg_child, buff_size);
     char **args = malloc(sizeof(char *) * MAX_ARGS_LEN);
     int args_len = parse_command_to_be_executed(read_msg_child, args);
     long time_of_command = strtol(args[args_len], NULL, 10);
     usleep(time_of_command * 1000);
     args[args_len] = NULL;
 
+    if (!retry)
+        dup2(fd_child[pipe_number * 2 + WRITE_END], STDOUT_FILENO);
+
     if ((execv(args[0], &args[1]) < 0))
     {
         char *err = (char *)malloc(sizeof(char) * LINE_SIZE);
-        sprintf(err, "warning!!!!!!!: couldnt execute!. command: %s", read_msg_child);
+        sprintf(err, "warning!!!!!!!: couldnt execute!. command: %s\n", read_msg_child);
         ERROR_HANDLER_AND_DIE(err);
     }
-    exit(0);
 }
 
 ChildInfo *create_new_process_ptr_info(
@@ -171,6 +176,7 @@ ChildInfo *create_new_process_ptr_info(
     c_process->parrent_number = parrent_number;
     c_process->command = (char *)malloc(1 * LINE_SIZE);
     c_process->number_of_trys = 1;
+    c_process->output[0] = '\0';
     return c_process;
 }
 
@@ -192,6 +198,7 @@ ChildInfo create_new_process_info(
     c_process.parrent_number = parrent_number;
     c_process.command = (char *)malloc(1 * LINE_SIZE);
     c_process.number_of_trys = 1;
+    c_process.output[0] = '\0';
     return c_process;
 }
 
@@ -228,6 +235,8 @@ void copy_process(int all_childs, ProcessConfigurations *conf, ChildInfo **child
         conf->process_created_inconfiguration[i]->execution_time = childs[i]->execution_time;
         conf->process_created_inconfiguration[i]->exit_status = childs[i]->exit_status;
         conf->process_created_inconfiguration[i]->number_of_trys = childs[i]->number_of_trys;
+        strcpy(conf->process_created_inconfiguration[i]->output, childs[i]->output);
+
         free(childs[i]);
     }
     conf->actual_time = exec_time;
@@ -274,6 +283,7 @@ int enqueue(ChildInfo **holder, ChildInfo *c_process_ptr, ChildInfo c_process, i
         holder[*counter]->execution_time = c_process.execution_time;
         holder[*counter]->exit_status = c_process.exit_status;
         holder[*counter]->number_of_trys = c_process.number_of_trys;
+        strcpy(holder[*counter]->output, c_process.output);
     }
     else
     {
@@ -288,6 +298,7 @@ int enqueue(ChildInfo **holder, ChildInfo *c_process_ptr, ChildInfo c_process, i
         holder[*counter]->execution_time = c_process_ptr->execution_time;
         holder[*counter]->exit_status = c_process_ptr->exit_status;
         holder[*counter]->number_of_trys = c_process_ptr->number_of_trys;
+        strcpy(holder[*counter]->output, c_process_ptr->output);
     }
     (*counter) = ((*counter) + 1);
     return count > MAX_QUEUE_SIZE ? count : MAX_QUEUE_SIZE;

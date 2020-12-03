@@ -282,6 +282,25 @@ void reading_file(char *filepath, Command *command_st)
     fclose(f);
 }
 
+void clean_output_string(char output[])
+{
+    for (int i = 0; output[i] != '\0'; i++)
+    {
+        if (isdigit(output[i]))
+            continue;
+        else if (output[i] == '.')
+            continue;
+        else if (output[i] == '\n')
+            output[i] = ' ';
+        else if (output[i] == '\"')
+            output[i] = '\"';
+        else if (output[i] == '\'')
+            output[i] = '\'';
+        else if (!isalpha(output[i]))
+            output[i] = ' ';
+    }
+}
+
 // showing the process INFO
 void printing_process_info(ChildInfo *c_process, Command *com)
 {

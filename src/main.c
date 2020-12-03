@@ -81,8 +81,19 @@ void write_output_file(int size, ProcessConfigurations **holder)
                              &holder[i]->process_created_inconfiguration[j]->process_number, INT);
             put_line_in_file(out, "\t\t\t\"%s\":%d, \n", "parrent process number",
                              &holder[i]->process_created_inconfiguration[j]->parrent_number, INT);
-            put_line_in_file(out, "\t\t\t\"%s\":%d \n", "number of trys",
+            put_line_in_file(out, "\t\t\t\"%s\":%d, \n", "number of trys",
                              &holder[i]->process_created_inconfiguration[j]->number_of_trys, INT);
+            if (holder[i]->process_created_inconfiguration[j]->output[0] != '\0')
+            {
+                clean_output_string(holder[i]->process_created_inconfiguration[j]->output);
+                char *temp = (char *)malloc(sizeof(holder[i]->process_created_inconfiguration[j]->output) + 20);
+                sprintf(temp, "\t\t\t\"%s\":\"%s\" \n", "output", holder[i]->process_created_inconfiguration[j]->output);
+                fputs(temp, out);
+                free(temp);
+            }
+            else
+                fputs("\t\t\t\"output\":\"\" \n", out);
+
             if (j == holder[i]->childs_size - 1)
                 fputs("\t\t}\n", out);
             else
