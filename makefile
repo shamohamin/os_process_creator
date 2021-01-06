@@ -7,12 +7,13 @@ CFILES  := $(wildcard $(SRC)/*.c)
 OBJS    := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(CFILES))
 OUTFILE := $(BIN)/main.out
 HEADERS := $(wildcard $(SRC)/*.h)
+OPTIONS = c99
 
 $(OUTFILE): $(OBJS) | $(BIN)
-	$(CC) -I $(HEADERS) $^ -o $@
+	$(CC) -I $(HEADERS) $^ -o $@ -std=$(OPTIONS)
 
 $(OBJ)/%.o: $(SRC)/%.c | $(OBJ)
-	$(CC) -c $< -o $@ 
+	$(CC) -c $< -o $@ -std=$(OPTIONS)
 
 $(BIN) $(OBJ):
 	$(MKDIR) $@

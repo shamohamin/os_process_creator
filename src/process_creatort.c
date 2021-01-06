@@ -30,7 +30,7 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
     pid_t main_routing_id = getpid();
 
     for (int i = 0; i < command_st->proccess_count; i++)
-    {
+    { // m
         memset(write_msg, 0, buff_size);
 
         pid_t pid = fork();
@@ -47,7 +47,7 @@ void creating_process(Command *command_st, ProcessConfigurations *conf)
             read(fd[2 * i + READ_END], read_msg, buff_size);
 
             for (int j = 0; j < command_st->child_proccess_count; j++)
-            {
+            { // n
                 memset(write_msg_child, 0, buff_size);
 
                 pid_t child_pid = fork();
@@ -237,7 +237,7 @@ void copy_process(int all_childs, ProcessConfigurations *conf, ChildInfo **child
         conf->process_created_inconfiguration[i]->number_of_trys = childs[i]->number_of_trys;
         strcpy(conf->process_created_inconfiguration[i]->output, childs[i]->output);
 
-        free(childs[i]);
+        // `(childs[i]);
     }
     conf->actual_time = exec_time;
     conf->childs_size = i;

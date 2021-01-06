@@ -1,12 +1,12 @@
 FROM gcc:4.9
 
-ENV WORKPLACE=~/Documents
-# just for caution
-RUN apt-get -y update && apt-get install -y build-essential make
-
-WORKDIR ${WORKPLACE}
+ENV WORKPLACE=~/Documents/app
+# insalling depedencies
+RUN apt-get install -y make git
 
 COPY . ${WORKPLACE}
+
+WORKDIR ${WORKPLACE}
 
 RUN gcc -v
 

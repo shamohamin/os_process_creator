@@ -1,12 +1,11 @@
-import enum
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import axis
 import numpy as np
 import os
 import json
 import glob
 import re
 import time
+import sys
 
 
 class Parser(object):
@@ -142,50 +141,51 @@ class Monitor:
                                    '\n' + 'second level' +
                                    str(item[self.parser.PROCESS_LEVEL_2])))
 
-        self.Y_DATA = np.vstack([self.Y_DATA, self.Y_DATA_CHILD])
+        for index, item in enumerate(self.Y_DATA):
+            self.Y_DATA[index] = item[1:]
+
+        # self.Y_DATA = np.vstack([self.Y_DATA, self.Y_DATA_CHILD])
         self.Y_DATA = np.array(self.Y_DATA)
         self.Y_DATA = np.average(self.Y_DATA, axis=1)
         self.Y_DATA = np.round(self.Y_DATA, 4)
         self.Y_DATA = self.Y_DATA.reshape(-1, 1)
 
     def draw(self) -> None:
-        fig, axes = plt.subplots(1, 2)
+        fig, axes = plt.subplots(1, 1)
         fig.set_size_inches((15, 8))
-        for i, ax in enumerate(axes):
-            start_index, end_index = i * \
-                len(self.mainProcess), (i+1) * len(self.mainProcess)
-            print(self.Y_DATA[start_index:end_index].ravel())
+        # for i, ax in enumerate(axes[:len(axes) - 1]):
 
-            indexs = np.arange(start=0, stop=len(
-                self.Y_DATA[start_index:end_index].ravel()))
+        # print(self.Y_DATA[start_index:end_index].ravel())
 
-            ax.plot(self.Y_DATA[start_index:end_index], 'r-')
-            for i, item in enumerate(self.Y_DATA[start_index: end_index].ravel()):
-                ax.plot([-1, i], [item, item], 'k--', linewidth=0.5)
+        indexs = np.arange(start=0, stop=len(
+            self.Y_DATA.ravel()))
 
-            ax.scatter(x=indexs,
-                       y=self.Y_DATA[start_index:end_index].ravel(),
-                       s=80, marker='o', c='k', zorder=10, alpha=.9)
+        axes.plot(self.Y_DATA, 'r-')
+        for i, item in enumerate(self.Y_DATA.ravel()):
+            axes.plot([-1, i], [item, item], 'k--', linewidth=0.5)
 
-            ax.set_xticks(indexs)
-            ax.set_xticklabels(self.X_DATA)
-            ticks = []
-            for item in self.Y_DATA[start_index:end_index].ravel():
-                ticks.append(str(item) + ' ms')
-            ax.set_yticks(self.Y_DATA[start_index:end_index].ravel())
-            ax.set_yticklabels(ticks)
-            ax.set_xlabel('configuration')
-            ax.bar(indexs, self.Y_DATA[start_index:end_index].ravel(), color=(
-                0.1, 0.5, 0.5, 1), width=.2)
+        axes.scatter(x=indexs,
+                     y=self.Y_DATA.ravel(),
+                     s=80, marker='o', c='k', zorder=10, alpha=.9)
 
-            ax.axis([-1, len(indexs), np.min(self.Y_DATA[start_index:end_index].ravel() - 1) -
-                     0.5, np.max(self.Y_DATA[start_index:end_index].ravel()) + 3])
-            ax.set_title(r'$Performance(After$ ' +
-                     str(RunCFile.NUM_OF_TRYS) + r' $try)$' + '')
-            ax.set_ylabel(r'$EXECUTION$ $TIME$')
+        axes.set_xticks(indexs)
+        axes.set_xticklabels(self.X_DATA)
+        ticks = []
+        for item in self.Y_DATA.ravel():
+            ticks.append(str(item) + ' ms')
+        axes.set_yticks(self.Y_DATA.ravel())
+        axes.set_yticklabels(ticks)
+        axes.set_xlabel('configuration')
+        axes.bar(indexs, self.Y_DATA.ravel(), color=(
+            0.1, 0.5, 0.5, 1), width=.2)
 
+        axes.axis([-1, len(indexs), np.min(self.Y_DATA.ravel() - 1) -
+                   0.5, np.max(self.Y_DATA.ravel()) + 3])
+        axes.set_title(r'$Performance(After$ ' +
+                       str(RunCFile.NUM_OF_TRYS) + r' $try)$' + '')
+        axes.set_ylabel(r'$EXECUTION$ $TIME$')
+        print(self.mainProcess)
         plt.show()
-        
 
     def execute(self) -> None:
         self.makeViewData()
@@ -196,7 +196,7 @@ class RunCFile:
     NUM_OF_TRYS = 10
 
     def __init__(self, num_of_trys=10) -> None:
-        self.NUM_OF_TRYS = num_of_trys
+        RunCFile.NUM_OF_TRYS = num_of_trys
         self.makefile = os.path.abspath(os.path.dirname(__file__))
         self.outputPath = os.path.join(os.path.abspath(
             os.path.dirname(__file__)), 'output.json')
@@ -225,4 +225,7 @@ class RunCFile:
 
 
 if __name__ == '__main__':
-    RunCFile().execute()
+    if len(sys.argv) > 1:
+        RunCFile(num_of_trys=int(sys.argv[1])).execute()
+    else:
+        RunCFile().execute()

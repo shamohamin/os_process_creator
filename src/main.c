@@ -56,7 +56,9 @@ void write_output_file(int size, ProcessConfigurations **holder)
     {
         fputs("\t{\n", out);
         holder[i]->execution_time = 1000.0 * holder[i]->execution_time;
-        holder[i]->actual_time = holder[i]->actual_time / 1e8;
+        if (holder[i]->actual_time > 1e4)
+            holder[i]->actual_time = holder[i]->actual_time / 1e8;
+
         put_line_in_file(out, "\t\t\"%s\":%lf,\n", "execution time", &holder[i]->execution_time, DOUBLE);
         put_line_in_file(out, "\t\t\"%s\":%lf,\n", "waiting of childs", &holder[i]->actual_time, DOUBLE);
         fputs("\t\t\"configuration\":[\n \t\t\t{\n", out);
@@ -83,16 +85,16 @@ void write_output_file(int size, ProcessConfigurations **holder)
                              &holder[i]->process_created_inconfiguration[j]->parrent_number, INT);
             put_line_in_file(out, "\t\t\t\"%s\":%d, \n", "number of trys",
                              &holder[i]->process_created_inconfiguration[j]->number_of_trys, INT);
-            if (holder[i]->process_created_inconfiguration[j]->output[0] != '\0')
-            {
-                clean_output_string(holder[i]->process_created_inconfiguration[j]->output);
-                char *temp = (char *)malloc(sizeof(holder[i]->process_created_inconfiguration[j]->output) + 20);
-                sprintf(temp, "\t\t\t\"%s\":\"%s\" \n", "output", holder[i]->process_created_inconfiguration[j]->output);
-                fputs(temp, out);
-                free(temp);
-            }
-            else
-                fputs("\t\t\t\"output\":\"\" \n", out);
+            // if (holder[i]->process_created_inconfiguration[j]->output[0] != '\0')
+            // {
+            //     clean_output_string(holder[i]->process_created_inconfiguration[j]->output);
+            //     char *temp = (char *)malloc(sizeof(holder[i]->process_created_inconfiguration[j]->output) + 20);
+            //     sprintf(temp, "\t\t\t\"%s\":\"%s\" \n", "output", holder[i]->process_created_inconfiguration[j]->output);
+            //     fputs(temp, out);
+            //     free(temp);
+            // }
+            // else
+            fputs("\t\t\t\"output\":\"\" \n", out);
 
             if (j == holder[i]->childs_size - 1)
                 fputs("\t\t}\n", out);
@@ -126,12 +128,12 @@ void put_line_in_file(FILE *file, char *format, char *key, void *value, int op)
         int c = strlen(t);
         t[c - 1] = '\0';
         sprintf(tmp, format, key, t);
-        free(t);
+        // free(t);
     }
     default:
         break;
     }
 
     fputs(tmp, file);
-    free(tmp);
+    // free(tmp);
 }
